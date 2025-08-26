@@ -16,11 +16,22 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import CheckoutButton from "@/components/CheckoutButton";
 
+// 👇 Tipo inmutable para que coincida con PRICES (que viene readonly)
+type PricePlan = {
+  readonly name: string;
+  readonly price: string;
+  readonly features: readonly string[];
+  readonly tag?: string;
+  readonly featured?: boolean;
+  readonly badge?: string;
+};
+
+// 👇 Usamos ReadonlyArray en vez de array mutable
+const PLANS = PRICES as ReadonlyArray<PricePlan>;
+
 export default function Pricing() {
-  // Altura fija en md+ (ajústala si quieres)
   const FIXED_CARD_H = "md:h-[460px]";
 
-  // Agrega UTM params a cualquier URL (aunque ya tenga ?query)
   function withUtm(url: string, planName: string) {
     if (!url) return "#";
     const sep = url.includes("?") ? "&" : "?";
@@ -28,16 +39,15 @@ export default function Pricing() {
     return `${url}${sep}utm_source=web&utm_medium=pricing&utm_campaign=checkout&plan=${plan}`;
   }
 
-  // Encogimiento sutil al hover/active
   const SHRINK =
     "h-full transform-gpu will-change-transform transition-transform duration-200 ease-out hover:scale-[0.985] active:scale-[0.975]";
 
   return (
     <section className="space-y-6">
       <div className="grid gap-6 md:grid-cols-3 items-stretch">
-        {PRICES.map((plan) => {
-          const isFeatured = (plan as any).featured;
-          const badge = (plan as any).badge as string | undefined;
+        {PLANS.map((plan) => {
+          const isFeatured = !!plan.featured;
+          const badge = plan.badge;
 
           const tagLines = String(plan.tag ?? "")
             .split(/\n|\/n/)
@@ -94,8 +104,6 @@ export default function Pricing() {
                 <Link href="/contacto">
                   <Button size="sm">Solicitar</Button>
                 </Link>
-
-                {/* ⬇️ Aquí usamos el nuevo CheckoutButton */}
                 <CheckoutButton href={checkoutUrl}>Pagar anticipo</CheckoutButton>
               </CardFooter>
             </Card>
@@ -104,7 +112,6 @@ export default function Pricing() {
           return (
             <div key={plan.name} className="h-full">
               {isFeatured ? (
-                // Wrapper con borde gradiente exterior (Pro) — el shrink se aplica al contenido
                 <div
                   className={cn(
                     "rounded-[28px] p-[1px]",

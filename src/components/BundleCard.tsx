@@ -7,7 +7,6 @@ import { formatCurrency } from "@/lib/money";
 import {
   Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import CheckoutButton from "@/components/CheckoutButton";
 
 type Props = {

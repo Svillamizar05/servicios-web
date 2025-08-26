@@ -9,26 +9,27 @@ export const metadata: Metadata = {
   description: "Gracias por tu pago. En breve nos pondremos en contacto.",
 };
 
-function getTxId(searchParams: Record<string, string | string[] | undefined>): string {
-  // Cubrimos distintos proveedores
+function getTxId(sp: Record<string, string | string[] | undefined>): string {
   const keys = [
     "tx", "transaction_id", "transactionId", "id", "reference",
     "collection_id", "payment_id", "preference_id", "ref"
   ];
   for (const k of keys) {
-    const v = searchParams[k];
+    const v = sp[k];
     if (typeof v === "string" && v) return v;
     if (Array.isArray(v) && v[0]) return v[0];
   }
   return "";
 }
 
-export default function Page({
+// 👇 Nota: En Next 15, searchParams es Promise<...>
+export default async function Page({
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const tx = getTxId(searchParams);
+  const sp = await searchParams;
+  const tx = getTxId(sp);
   const isTest = process.env.NEXT_PUBLIC_PAYMENTS_TEST_MODE === "1";
 
   const whatsappMsg = `Hola, ya realicé el pago. Mi referencia es: ${tx || "(sin ref)"}`;
