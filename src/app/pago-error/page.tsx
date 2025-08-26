@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Pago no completado | DeX Web",
-  description: "Hubo un problema al procesar el pago.",
+  title: "Pago fallido | DeX Web",
+  description: "El pago no se completó. Intenta nuevamente o contáctanos.",
 };
 
 export default function Page() {
-  const whatsappMsg = "Hola, tuve un problema al pagar. ¿Me ayudas?";
-  const whatsapp = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`;
+  const whatsappMsg = "Hola, tuve un problema con el pago, ¿me puedes ayudar?";
+  const whatsapp = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
+    whatsappMsg
+  )}`;
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-20">
@@ -19,19 +22,25 @@ export default function Page() {
       </p>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <a href="/precios">
+        <Link href="/precios" className="inline-block">
           <Button>Intentar de nuevo</Button>
-        </a>
-        <a href={whatsapp} target="_blank" rel="noopener noreferrer">
+        </Link>
+        <a
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block"
+        >
           <Button variant="outline">Hablar por WhatsApp</Button>
         </a>
-        <a href="/contacto">
+        <Link href="/contacto" className="inline-block">
           <Button variant="outline">Contacto</Button>
-        </a>
+        </Link>
       </div>
 
       <p className="mt-6 text-xs text-slate-400">
-        Si el cargo quedó pendiente en tu banco, debería reversarse automáticamente en poco tiempo.
+        Si el cargo quedó pendiente en tu banco, debería reversarse
+        automáticamente en poco tiempo.
       </p>
     </main>
   );

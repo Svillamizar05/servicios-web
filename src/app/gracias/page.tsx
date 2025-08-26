@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
 import { Button } from "@/components/ui/button";
 import CopyButton from "@/components/CopyButton";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pago recibido | DeX Web",
@@ -30,7 +31,7 @@ export default function Page({
   const tx = getTxId(searchParams);
   const isTest = process.env.NEXT_PUBLIC_PAYMENTS_TEST_MODE === "1";
 
-  const whatsappMsg = `Hola, ya realicé el pago. Mi referencia es: ${tx || "(sin ref)"}`
+  const whatsappMsg = `Hola, ya realicé el pago. Mi referencia es: ${tx || "(sin ref)"}`;
   const whatsapp = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(whatsappMsg)}`;
 
   return (
@@ -61,13 +62,18 @@ export default function Page({
       )}
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <a href="/" className="inline-block">
+        <Link href="/" className="inline-block">
           <Button>Volver al inicio</Button>
-        </a>
-        <a href="/precios" className="inline-block">
+        </Link>
+        <Link href="/precios" className="inline-block">
           <Button variant="outline">Ver planes</Button>
-        </a>
-        <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="inline-block">
+        </Link>
+        <a
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block"
+        >
           <Button variant="outline">Confirmar por WhatsApp</Button>
         </a>
       </div>
