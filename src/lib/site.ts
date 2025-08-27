@@ -2,7 +2,7 @@
 export const SITE = {
   brand: "HexaWeb",
   email: "servicios@hexawebdevelopers.com",
-  whatsapp: "573173551586",
+  whatsapp: "5700000000",
   whatsappDisplay: "57 3173551586",
   location: "Medellín, Colombia",
 };

@@ -10,11 +10,11 @@ import {
 import { SITE } from "@/lib/site";
 
 type Props = {
-  proMonthly: number;
-  growthMonthly: number;
+  proMonthly: number;         // Precio único del plan Pro (no mensual)
+  growthMonthly: number;      // Precio mensual del Growth
   months?: number;
-  discountSuggested?: number;
-  bundleTotalOverride?: number | null;
+  discountSuggested?: number; // 0.2 = 20% (opcional)
+  bundleTotalOverride?: number | null; // fuerza un total exacto si quieres
   currency?: "USD" | "COP";
 };
 
@@ -22,19 +22,27 @@ export default function BundleCard({
   proMonthly,
   growthMonthly,
   months = 3,
-  discountSuggested = 0.2,
+  discountSuggested = 0.14,
   bundleTotalOverride = null,
   currency = "COP",
 }: Props) {
+  // ✅ Cálculo correcto: Pro una sola vez + Growth por meses
   const originalTotal = useMemo(
-    () => (proMonthly + growthMonthly) * months,
+    () => proMonthly + growthMonthly * months,
     [proMonthly, growthMonthly, months]
   );
+
   const bundleTotal = useMemo(
-    () => bundleTotalOverride ?? Math.round(originalTotal * (1 - discountSuggested)),
+    () =>
+      bundleTotalOverride ??
+      Math.round(originalTotal * (1 - (discountSuggested || 0))),
     [bundleTotalOverride, originalTotal, discountSuggested]
   );
-  const discountPct = Math.round((1 - bundleTotal / originalTotal) * 100);
+
+  const discountPct = Math.max(
+    0,
+    Math.round((1 - bundleTotal / Math.max(originalTotal, 1)) * 100)
+  );
 
   const SHRINK =
     "h-full transform-gpu will-change-transform transition-transform duration-200 ease-out hover:scale-[0.985] active:scale-[0.975]";
@@ -56,7 +64,9 @@ Gracias.`;
 
     const enc = (s: string) => encodeURIComponent(s);
     const mailto = `mailto:${to}?subject=${enc(subject)}&body=${enc(body)}`;
-    const gmail  = `https://mail.google.com/mail/?view=cm&to=${enc(to)}&su=${enc(subject)}&body=${enc(body)}`;
+    const gmail = `https://mail.google.com/mail/?view=cm&to=${enc(
+      to
+    )}&su=${enc(subject)}&body=${enc(body)}`;
     return { mailto, gmail };
   }
 
@@ -88,7 +98,7 @@ Gracias.`;
                   className="rounded-full border border-white/30 px-2 py-0.5 text-[11px] leading-none text-white/90 bg-white/10"
                   title={`Ahorro vs. ${formatCurrency(originalTotal, currency)}`}
                 >
-                  -{discountPct}% OFF
+                  {discountPct > 0 ? `-${discountPct}% OFF` : "Precio neto"}
                 </span>
               </div>
               <CardDescription className="mt-1 text-[13px] text-white/85">
@@ -107,9 +117,15 @@ Gracias.`;
 
             <CardFooter className="mt-auto flex items-end justify-between gap-4 pt-4">
               <div>
-                <div className="text-xl md:text-2xl font-bold">{formatCurrency(bundleTotal, currency)}</div>
-                <div className="text-xs text-white/80 line-through">{formatCurrency(originalTotal, currency)}</div>
-                <div className="text-[11px] text-white/80 mt-1">Equivale a {months} meses de Pro + Growth</div>
+                <div className="text-xl md:text-2xl font-bold">
+                  {formatCurrency(bundleTotal, currency)}
+                </div>
+                <div className="text-xs text-white/80 line-through">
+                  {formatCurrency(originalTotal, currency)}
+                </div>
+                <div className="text-[11px] text-white/80 mt-1">
+                  Equivale a Pro + {months} meses de Growth
+                </div>
               </div>
 
               <button
