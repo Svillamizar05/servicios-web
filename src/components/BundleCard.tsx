@@ -7,7 +7,7 @@ import { formatCurrency } from "@/lib/money";
 import {
   Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
 } from "@/components/ui/card";
-import CheckoutButton from "@/components/CheckoutButton";
+import { SITE } from "@/lib/site";
 
 type Props = {
   proMonthly: number;
@@ -16,14 +16,7 @@ type Props = {
   discountSuggested?: number;
   bundleTotalOverride?: number | null;
   currency?: "USD" | "COP";
-  ctaHref?: string; // si no se pasa, usa la env
 };
-
-function withUtm(url: string, plan = "bundle3m") {
-  if (!url) return "#";
-  const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}utm_source=web&utm_medium=pricing&utm_campaign=checkout&plan=${encodeURIComponent(plan)}`;
-}
 
 export default function BundleCard({
   proMonthly,
@@ -32,26 +25,52 @@ export default function BundleCard({
   discountSuggested = 0.2,
   bundleTotalOverride = null,
   currency = "COP",
-  ctaHref = (process.env.NEXT_PUBLIC_CHECKOUT_BUNDLE3M_URL as string) ||
-            (process.env.NEXT_PUBLIC_CHECKOUT_BUNDLE_URL as string) || "#",
 }: Props) {
-  const originalTotal = useMemo(() => (proMonthly + growthMonthly) * months, [proMonthly, growthMonthly, months]);
-  const bundleTotal = useMemo(() => bundleTotalOverride ?? Math.round(originalTotal * (1 - discountSuggested)), [bundleTotalOverride, originalTotal, discountSuggested]);
+  const originalTotal = useMemo(
+    () => (proMonthly + growthMonthly) * months,
+    [proMonthly, growthMonthly, months]
+  );
+  const bundleTotal = useMemo(
+    () => bundleTotalOverride ?? Math.round(originalTotal * (1 - discountSuggested)),
+    [bundleTotalOverride, originalTotal, discountSuggested]
+  );
   const discountPct = Math.round((1 - bundleTotal / originalTotal) * 100);
-  const checkoutUrl = withUtm(ctaHref, "bundle3m");
 
   const SHRINK =
     "h-full transform-gpu will-change-transform transition-transform duration-200 ease-out hover:scale-[0.985] active:scale-[0.975]";
 
+  function buildEmailLinks() {
+    const to = SITE.email || "contacto@hexaweb.com";
+    const subject = `Solicitud de cotización – Bundle ${months} meses`;
+    const body = `Hola HexaWeb,
+
+Estoy interesado en el bundle de ${months} meses (Pro + Growth).
+Por favor envíenme la cotización y tiempos de entrega.
+
+Nombre:
+Teléfono/WhatsApp:
+Empresa (opcional):
+Comentarios:
+
+Gracias.`;
+
+    const enc = (s: string) => encodeURIComponent(s);
+    const mailto = `mailto:${to}?subject=${enc(subject)}&body=${enc(body)}`;
+    const gmail  = `https://mail.google.com/mail/?view=cm&to=${enc(to)}&su=${enc(subject)}&body=${enc(body)}`;
+    return { mailto, gmail };
+  }
+
+  const { mailto, gmail } = buildEmailLinks();
+
   return (
     <div className="h-full">
-      {/* Borde exterior gradiente animado */}
-      <div className="rounded-[28px] p-[1px]
-                      [background:linear-gradient(135deg,theme(colors.violet.500),theme(colors.fuchsia.400),theme(colors.violet.500))]
-                      [background-size:200%_100%] animate-[border-pan_6s_linear_infinite]
-                      transition-shadow hover:shadow-[0_25px_80px_-20px_rgba(139,92,246,0.45)]">
+      <div
+        className="rounded-[28px] p-[1px]
+                   [background:linear-gradient(135deg,theme(colors.violet.500),theme(colors.fuchsia.400),theme(colors.violet.500))]
+                   [background-size:200%_100%] animate-[border-pan_6s_linear_infinite]
+                   transition-shadow hover:shadow-[0_25px_80px_-20px_rgba(139,92,246,0.45)]"
+      >
         <div className={SHRINK}>
-          {/* Box con gradiente interior (solo bundle) */}
           <Card
             className="
               h-full flex flex-col border-0 rounded-[26px]
@@ -93,10 +112,16 @@ export default function BundleCard({
                 <div className="text-[11px] text-white/80 mt-1">Equivale a {months} meses de Pro + Growth</div>
               </div>
 
-              {/* ⬇️ Aquí usamos el nuevo CheckoutButton */}
-              <CheckoutButton href={checkoutUrl}>
-                Empezar ahora
-              </CheckoutButton>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-violet-700 hover:bg-white/90 transition"
+                onClick={() => {
+                  try { window.open(gmail, "_blank", "noopener,noreferrer"); } catch {}
+                  try { window.location.href = mailto; } catch {}
+                }}
+              >
+                Solicitar cotización
+              </button>
             </CardFooter>
           </Card>
         </div>

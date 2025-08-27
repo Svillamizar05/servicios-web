@@ -1,10 +1,10 @@
 // src/lib/site.ts
 export const SITE = {
-  brand: "DeX Web",
-  email: "contacto@tumarca.com",
+  brand: "HexaWeb",
+  email: "servicios@hexawebdevelopers.com",
   whatsapp: "573173551586",
   whatsappDisplay: "57 3173551586",
-  city: "Medellín, Colombia",
+  location: "Medellín, Colombia",
 };
 
 export const NAV = [

@@ -1,3 +1,4 @@
+// src/app/(marketing)/services-landing/page.tsx  (o donde tengas este componente)
 "use client";
 
 import { useState } from "react";
@@ -17,23 +18,30 @@ import {
   Rocket,
   Sparkles,
 } from "lucide-react";
+import { SITE } from "@/lib/site";
 
 export default function ServicesLanding() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
-  // Ajusta tus datos
-  const EMAIL = "contacto@tumarca.com";
-  const WHATSAPP = "573000000000"; // formato internacional
+  // Centralizado en SITE
+  const EMAIL = SITE.email;
+  const WHATSAPP = SITE.whatsapp; // E.164: ej. 57300xxxxxxx
+  const LOCATION = SITE.location || "Medellín, Colombia";
+
+  // Construcción única de asunto/cuerpo
+  const subject = `Cotización sitio web`;
+  const body = `Hola, soy ${form.name || "[tu nombre]"} (Email: ${form.email || "[tu email]"}).
+
+Quiero un sitio web y estos son los detalles:
+${form.message || "[escribe aquí]"}`;
+
+  const enc = (s: string) => encodeURIComponent(s);
+  const mailto = `mailto:${EMAIL}?subject=${enc(subject)}&body=${enc(body)}`;
+  const gmail  = `https://mail.google.com/mail/?view=cm&to=${enc(EMAIL)}&su=${enc(subject)}&body=${enc(body)}`;
 
   const handleMailTo = () => {
-    const subject = encodeURIComponent("Cotización sitio web");
-    const body = encodeURIComponent(
-      `Hola, soy ${form.name || "[tu nombre]"} (Email: ${form.email || "[tu email]"}).
-
-Quiero un sitio web y estos son los detalles: 
-${form.message || "[escribe aquí]"}`
-    );
-    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+    try { window.open(gmail, "_blank", "noopener,noreferrer"); } catch {}
+    try { window.location.href = mailto; } catch {}
   };
 
   return (
@@ -64,20 +72,22 @@ ${form.message || "[escribe aquí]"}`
             </h1>
 
             <p className="mt-4 text-lg text-slate-600">
-              Diseño y desarrollo web profesional. SEO base, performance y soporte post‑lanzamiento incluidos.
+              Diseño y desarrollo web profesional. SEO base, performance y soporte post-lanzamiento incluidos.
             </p>
 
             <div className="mt-6 flex flex-col sm:flex-row gap-3">
               <Button className="h-11" onClick={handleMailTo}>
                 Pide una cotización <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <a href="/precios"><Button variant="outline" className="h-11">Ver precios</Button></a>
+              <a href="/precios">
+                <Button variant="outline" className="h-11">Ver precios</Button>
+              </a>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-500">
               <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>Entrega en días</div>
               <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>SEO base incluido</div>
-              <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>Soporte post‑lanzamiento</div>
+              <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>Soporte post-lanzamiento</div>
             </div>
           </motion.div>
 
@@ -184,8 +194,8 @@ ${form.message || "[escribe aquí]"}`
             <p className="text-slate-600 mt-2">Cuéntame qué necesitas y te respondo en menos de 24h.</p>
             <div className="mt-6 space-y-3 text-sm text-slate-600">
               <div className="flex items-center gap-2"><Mail className="h-4 w-4"/> {EMAIL}</div>
-              <div className="flex items-center gap-2"><Phone className="h-4 w-4"/> +57 {WHATSAPP.replace("57", "").replace(/^0+/, "")}</div>
-              <div className="flex items-center gap-2"><MapPin className="h-4 w-4"/> Medellín, Colombia</div>
+              <div className="flex items-center gap-2"><Phone className="h-4 w-4"/> +{WHATSAPP}</div>
+              <div className="flex items-center gap-2"><MapPin className="h-4 w-4"/> {LOCATION}</div>
             </div>
           </div>
           <Card className="rounded-2xl">
@@ -197,10 +207,12 @@ ${form.message || "[escribe aquí]"}`
                 <Button className="h-11" onClick={handleMailTo}>Enviar por email</Button>
                 <a
                   className="h-11 inline-flex items-center justify-center rounded-md border px-4 font-medium"
-                  href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Hola, quiero una web. Detalles: "+form.message)}`}
+                  href={`https://wa.me/${WHATSAPP}?text=${enc("Hola, quiero una web. Detalles: " + (form.message || ""))}`}
                   target="_blank"
                   rel="noopener"
-                >WhatsApp</a>
+                >
+                  WhatsApp
+                </a>
               </div>
               <p className="text-xs text-slate-500">Este formulario es de demostración.</p>
             </CardContent>
@@ -211,7 +223,7 @@ ${form.message || "[escribe aquí]"}`
       {/* === Footer === */}
       <footer className="border-t border-slate-200">
         <div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-500 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div>© {new Date().getFullYear()} DeX Web. Todos los derechos reservados.</div>
+          <div>© {new Date().getFullYear()} {SITE.brand}. Todos los derechos reservados.</div>
           <div className="flex gap-4">
             <a href="/privacidad" className="hover:text-slate-800">Privacidad</a>
             <a href="/terminos" className="hover:text-slate-800">Términos</a>

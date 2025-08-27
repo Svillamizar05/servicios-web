@@ -27,7 +27,7 @@ export default function Page() {
       <div className="mt-6 text-slate-600 space-y-1">
         <div><b>Email:</b> {SITE.email}</div>
         <div><b>WhatsApp:</b> +{SITE.whatsapp}</div>
-        <div><b>Ubicación:</b> {SITE.city}</div>
+        <div><b>Ubicación:</b> {SITE.location}</div>
       </div>
     </main>
   );

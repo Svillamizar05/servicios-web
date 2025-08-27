@@ -1,22 +1,13 @@
 // src/components/Pricing.tsx
 "use client";
 
-import Link from "next/link";
-import { PRICES, CHECKOUT } from "@/lib/site";
-import { Button } from "@/components/ui/button";
+import { PRICES, SITE } from "@/lib/site";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
+  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter,
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import CheckoutButton from "@/components/CheckoutButton";
 
-// 👇 Tipo inmutable para que coincida con PRICES (que viene readonly)
 type PricePlan = {
   readonly name: string;
   readonly price: string;
@@ -26,17 +17,30 @@ type PricePlan = {
   readonly badge?: string;
 };
 
-// 👇 Usamos ReadonlyArray en vez de array mutable
 const PLANS = PRICES as ReadonlyArray<PricePlan>;
 
 export default function Pricing() {
   const FIXED_CARD_H = "md:h-[460px]";
 
-  function withUtm(url: string, planName: string) {
-    if (!url) return "#";
-    const sep = url.includes("?") ? "&" : "?";
-    const plan = encodeURIComponent(planName.toLowerCase());
-    return `${url}${sep}utm_source=web&utm_medium=pricing&utm_campaign=checkout&plan=${plan}`;
+  function buildEmailLinks(planName: string) {
+    const to = SITE.email || "contacto@hexaweb.com";
+    const subject = `Solicitud de cotización – ${planName}`;
+    const body = `Hola HexaWeb,
+
+Estoy interesado en el plan "${planName}". Por favor envíenme la cotización y tiempos de entrega.
+
+Nombre:
+Teléfono/WhatsApp:
+Empresa (opcional):
+Sitio actual (si aplica):
+Comentarios:
+
+Gracias.`;
+
+    const enc = (s: string) => encodeURIComponent(s);
+    const mailto = `mailto:${to}?subject=${enc(subject)}&body=${enc(body)}`;
+    const gmail  = `https://mail.google.com/mail/?view=cm&to=${enc(to)}&su=${enc(subject)}&body=${enc(body)}`;
+    return { mailto, gmail };
   }
 
   const SHRINK =
@@ -54,8 +58,7 @@ export default function Pricing() {
             .map((s) => s.trim())
             .filter(Boolean);
 
-          const checkoutBase = CHECKOUT[plan.name as keyof typeof CHECKOUT] || "#";
-          const checkoutUrl = withUtm(checkoutBase, plan.name);
+          const { mailto, gmail } = buildEmailLinks(plan.name);
 
           const CardInner = (
             <Card
@@ -79,11 +82,9 @@ export default function Pricing() {
                     </span>
                   )}
                 </div>
-
                 <div className="mt-1 text-2xl font-bold tracking-tight">
                   {plan.price}
                 </div>
-
                 <CardDescription className="mt-2 text-[13px] text-slate-500 line-clamp-2">
                   {tagLines.join(" · ")}
                 </CardDescription>
@@ -100,11 +101,17 @@ export default function Pricing() {
                 </ul>
               </CardContent>
 
-              <CardFooter className="mt-auto flex gap-3 pt-4">
-                <Link href="/contacto">
-                  <Button size="sm">Solicitar</Button>
-                </Link>
-                <CheckoutButton href={checkoutUrl}>Pagar anticipo</CheckoutButton>
+              <CardFooter className="mt-auto pt-4">
+                <button
+                  type="button"
+                  className="inline-flex w-full md:w-auto items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition"
+                  onClick={() => {
+                    try { window.open(gmail, "_blank", "noopener,noreferrer"); } catch {}
+                    try { window.location.href = mailto; } catch {}
+                  }}
+                >
+                  Solicitar cotización
+                </button>
               </CardFooter>
             </Card>
           );
